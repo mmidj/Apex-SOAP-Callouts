@@ -1,0 +1,73 @@
+Generate an Apex class using WSDL2Apex and write a test class.
+Generate an Apex class using WSDL2Apex for a SOAP web service, write unit tests that achieve 100% code coverage for the class using a mock response, and run your Apex tests.
+
+Use WSDL2Apex to generate a class called 'ParkService' in public scope using this WSDL file. After you click the 'Parse WSDL' button don't forget to change the name of the Apex Class Name from 'parksServices' to 'ParkService'.
+Create a class called 'ParkLocator' that has a 'country' method that uses the 'ParkService' class and returns an array of available park names for a particular country passed to the web service. Possible country names that can be passed to the web service include Germany, India, Japan and United States.
+Create a test class named ParkLocatorTest that uses a mock class called ParkServiceMock to mock the callout response.
+The unit tests must cover all lines of code included in the ParkLocator class, resulting in 100% code coverage.
+Run your test class at least once (via 'Run All' tests the Developer Console) before attempting to verify this challenge.
+Apex Service
+
+
+Apex Class
+
+public class ParkLocator {
+    public static list<string> country(string Country) {
+        ParkService.ParksImplPort parkSvc = new  ParkService.ParksImplPort(); // remove space
+        return parkSvc.byCountry(Country);
+    }
+}
+
+
+
+
+Apex Test Class
+
+@isTest
+private class ParkLocatorTest {
+    @isTest static void testCallout() {              
+        // This causes a fake response to be generated
+        Test.setMock(WebServiceMock.class, new ParkServiceMock());
+        // Call the method that invokes a callout
+        string country = 'united states';
+        list<string> result = ParkLocator.country(country);
+        list<string> Parks = new list<string>();
+        Parks.add('Yellowstone');
+        Parks.add('Yosemite');
+        Parks.add('Mackinac National Park');
+        // Verify that a fake result is returned
+        System.assertEquals(Parks, result); 
+    }
+}
+
+
+
+Apex Mock Test Class
+
+@isTest
+global class ParkServiceMock implements WebServiceMock {
+   global void doInvoke(
+           Object stub,
+           Object request,
+           Map<String, Object> response,
+           String endpoint,
+           String soapAction,
+           String requestName,
+           String responseNS,
+           String responseName,
+           String responseType) {
+        // start - specify the response you want to send
+        list<string> Parks = new list<string>();
+        Parks.add('Yellowstone');
+        Parks.add('Yosemite');
+        Parks.add('Mackinac National Park');
+        ParkService.byCountryResponse response_x = new ParkService.byCountryResponse();
+        response_x.return_x = Parks;
+        // end
+        response.put('response_x', response_x); 
+   }
+}
+
+
+Setup Remote site settings
+URL : 	https://th-apex-soap-service.herokuapp.com
